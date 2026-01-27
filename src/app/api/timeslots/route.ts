@@ -3,10 +3,22 @@ import { connectDB } from "@/lib/mongodb"
 import Timeslot from "@/models/Timeslot"
 
 export async function GET() {
-  await connectDB()
-  const data = await Timeslot.find()
-    .sort({ utcTime: 1 })
-    .select("-_id utcTime")
+  try {
+    await connectDB()
 
-  return NextResponse.json(data.map(d => d.utcTime))
+    const data = await Timeslot.find()
+      .sort({ utcTime: 1 })
+      .select("-_id utcTime")
+
+    return NextResponse.json(
+      data.map(d => d.utcTime)
+    )
+  } catch (error) {
+    console.error("Failed to fetch timeslots:", error)
+
+    return NextResponse.json(
+      { message: "Failed to fetch timeslots" },
+      { status: 500 }
+    )
+  }
 }

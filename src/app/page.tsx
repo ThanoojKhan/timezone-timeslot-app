@@ -15,14 +15,39 @@ export default function Home() {
   const [selectedUTC, setSelectedUTC] = useState<string | null>(null)
   const [showDetails, setShowDetails] = useState(false)
 
-  useEffect(() => {
-    fetch("/api/timezones")
-      .then(res => res.json())
-      .then(setTimezones)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-    fetch("/api/timeslots")
-      .then(res => res.json())
-      .then(setTimeslotsUTC)
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+
+        const [tzRes, slotRes] = await Promise.all([
+          fetch("/api/timezones"),
+          fetch("/api/timeslots")
+        ])
+
+        if (!tzRes.ok || !slotRes.ok) {
+          throw new Error("Failed to fetch data")
+        }
+
+        const [tzData, slotData] = await Promise.all([
+          tzRes.json(),
+          slotRes.json()
+        ])
+
+        setTimezones(tzData)
+        setTimeslotsUTC(slotData)
+      } catch (err) {
+        setError("Unable to load timezones or timeslots")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
   }, [])
 
   const selectedTimezone = timezones.find(
@@ -47,50 +72,72 @@ export default function Home() {
           Timezone and Timeslot Management
         </h1>
 
-        {/** Timezone Dropdown */}
-        <TimezoneDropdown
-          timezones={timezones}
-          value={selectedTimezoneId}
-          onChange={id => {
-            setSelectedTimezoneId(id)
-            setSelectedUTC(null)
-            setShowDetails(false)
-          }}
-        />
-
-        {/** Timeslot List */}
-        {selectedTimezone && (
-          <TimeslotList
-            slots={displayedSlots}
-            selected={selectedUTC}
-            onSelect={utc => {
-              setSelectedUTC(utc)
-              setShowDetails(false)
-            }}
-          />
+        {/* Loading indicator */}
+        {loading && (
+          <p className="text-sm text-gray-500">
+            Loading timezones and timeslots...
+          </p>
         )}
 
-        {/** Timeslot Details */}
-        {selectedUTC && selectedTimezone && (
-          <div className="mt-4">
-            <button
-              onClick={() => setShowDetails(true)}
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 transition"
-            >
-              Show Timeslot Details
-            </button>
+        {/* Error message */}
+        {error && (
+          <p className="text-sm text-red-600">
+            {error}
+          </p>
+        )}
 
-            {showDetails && (
-              <TimeslotDetails
-                utc={selectedUTC}
-                zonedDate={convertUtcToZoneDate(
-                  selectedUTC,
-                  selectedTimezone.iana
-                )}
-                offset={selectedTimezone.offset}
+        {/* Main UI content*/}
+        {!loading && !error && (
+          <>
+            <TimezoneDropdown
+              timezones={timezones}
+              value={selectedTimezoneId}
+              onChange={id => {
+                setSelectedTimezoneId(id)
+                setSelectedUTC(null)
+                setShowDetails(false)
+              }}
+            />
+
+            {selectedTimezone && displayedSlots.length === 0 && (
+              <p className="mt-4 text-sm text-gray-500">
+                No timeslots available for this timezone
+              </p>
+            )}
+
+            {selectedTimezone && displayedSlots.length > 0 && (
+              <TimeslotList
+                slots={displayedSlots}
+                selected={selectedUTC}
+                onSelect={utc => {
+                  setSelectedUTC(utc)
+                  setShowDetails(false)
+                }}
               />
             )}
-          </div>
+
+            {selectedUTC && selectedTimezone && (
+              <div className="mt-4">
+                <button
+                  onClick={() => setShowDetails(true)}
+                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 transition"
+                >
+                  Show Timeslot Details
+                </button>
+
+                {showDetails && (
+                  <TimeslotDetails
+                    utc={selectedUTC}
+                    zonedDate={convertUtcToZoneDate(
+                      selectedUTC,
+                      selectedTimezone.iana
+                    )}
+                    offset={selectedTimezone.offset}
+                  />
+                )}
+              </div>
+            )}
+          </>
         )}
       </div>
     </main>
