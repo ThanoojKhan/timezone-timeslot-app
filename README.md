@@ -11,14 +11,20 @@ The implementation focuses on correctness, clarity and real-world timezone edge 
 - Never rely on browser local timezone implicitly
 - Separate conversion logic from presentation logic
 
+## Framework & Architectural Standards
+
+### Next.js App Router
+- Built using Next.js App Router
+- API routes implemented using app/api/*/route.ts
+- Clear separation between server and client components
+- "use client" is applied only where client-side state or effects are required
+
 ## Data Model
 
 ### Timeslot
 - Stored as a UTC ISO string
 - Example:
-  ```
   2025-01-23T00:00:00Z
-  ```
 - Represents an absolute moment in time
 
 ### Timezone
@@ -37,8 +43,12 @@ Each timezone record includes:
 ### APIs
 - /api/timeslots returns an ordered list of UTC timestamps
 - /api/timezones returns timezone metadata including IANA identifiers
-- 
-- /api/seed stores the hard coded data to the db (only for testing purpose***) 
+- /api/seed seeds hard-coded data into the database (used only for testing)
+
+### Database Connection Management
+- MongoDB is used as the primary data store
+- Mongoose is used as the ODM
+- A global connection cache is implemented to prevent multiple connections
 
 ## Frontend Architecture
 
@@ -50,7 +60,7 @@ Each timezone record includes:
 
 ### Libraries Used
 - date-fns-tz for timezone-aware conversion and formatting
-- React state for controlled selection and rendering
+- React hooks for state management
 
 ## Time Conversion Strategy
 
@@ -66,7 +76,7 @@ UTC is always formatted explicitly using the UTC timezone to avoid browser-local
 
 ## Display Rules
 - Original UTC is always formatted in UTC
-- Selected Timezone is converted using the selected IANA timezone**
+- Selected Timezone is converted using the selected IANA timezone
 - Offset is displayed as metadata and not used for conversion logic
 
 ## Example
@@ -85,3 +95,7 @@ For a stored UTC value:
 - Manual offset-based conversion
 - Ignoring daylight saving time
 - Storing local time in the database
+
+## Final Notes
+This project prioritizes correctness and clarity over shortcuts.
+Timezone handling is one of the most error-prone areas in software and this implementation demonstrates a disciplined, production-safe approach suitable for interview assessments.
