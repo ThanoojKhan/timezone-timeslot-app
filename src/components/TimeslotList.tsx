@@ -18,7 +18,7 @@ export default function TimeslotList({
                 <li key={slot.utc}>
                     <button
                         onClick={() => onSelect(slot.utc)}
-                        className={`w-full rounded-lg border px-3 py-2 text-sm transition
+                        className={`w-full rounded-lg border px-3 py-2 text-sm transition cursor-pointer
               ${selected === slot.utc
                                 ? "bg-blue-600 text-white border-blue-600"
                                 : "bg-white hover:bg-blue-200 border-gray-300"

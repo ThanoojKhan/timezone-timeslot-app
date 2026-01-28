@@ -66,7 +66,7 @@ export default function Home() {
     : []
 
   return (
-    <main className="min-h-screen flex items-center justify-center">
+    <main className="min-h-screen flex items-center justify-center select-none">
       <div className="w-full max-w-xl rounded-xl bg-white p-6 shadow">
         <h1 className="text-xl font-semibold mb-4">
           Timezone and Timeslot Management
@@ -120,7 +120,7 @@ export default function Home() {
               <div className="mt-4">
                 <button
                   onClick={() => setShowDetails(true)}
-                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 transition"
+                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 transition cursor-pointer"
                 >
                   Show Timeslot Details
                 </button>
