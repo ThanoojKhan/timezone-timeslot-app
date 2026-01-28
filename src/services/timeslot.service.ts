@@ -1,9 +1,11 @@
-import Timeslot from "@/models/Timeslot"
+import TimeslotModel from "@/models/Timeslot"
+import type { Timeslot } from "@/types/timeslot"
 
 export async function getTimeslotsUTC(): Promise<string[]> {
-  const data = await Timeslot.find()
-    .sort({ utcTime: 1 })
-    .select("-_id utcTime")
+    const data: Timeslot[] = await TimeslotModel.find()
+        .sort({ utcTime: 1 })
+        .select("-_id utcTime")
+        .lean()
 
-  return data.map(d => d.utcTime)
+    return data.map(d => d.utcTime)
 }

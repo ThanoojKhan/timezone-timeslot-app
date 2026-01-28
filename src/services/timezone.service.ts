@@ -1,6 +1,10 @@
-import Timezone from "@/models/Timezone"
+import TimezoneModel from "@/models/Timezone"
+import type { Timezone } from "@/types/timezone"
 
-export async function getTimezones() {
-  return Timezone.find()
-    .select("-_id id name offset iana")
+export async function getTimezones(): Promise<Timezone[]> {
+    const data: Timezone[] = await TimezoneModel.find()
+        .select("-_id id name offset iana")
+        .lean()
+
+    return data
 }
