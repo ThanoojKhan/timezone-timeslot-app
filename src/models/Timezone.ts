@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose"
+import mongoose, { Schema, model, models, type Model } from "mongoose"
 
 const TimezoneSchema = new Schema(
     {
@@ -10,7 +10,10 @@ const TimezoneSchema = new Schema(
     { timestamps: true }
 )
 
-export default mongoose.models.Timezone ||
-    mongoose.model("Timezone", TimezoneSchema)
 
 export type Timezone = mongoose.InferSchemaType<typeof TimezoneSchema>
+
+const TimezoneModel: Model<Timezone> =
+    models.Timezone || model<Timezone>("Timezone", TimezoneSchema)
+
+export default TimezoneModel

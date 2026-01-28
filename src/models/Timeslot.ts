@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose"
+import mongoose, { Schema, model, models, type Model } from "mongoose"
 
 const TimeslotSchema = new Schema(
     {
@@ -7,7 +7,9 @@ const TimeslotSchema = new Schema(
     { timestamps: true }
 )
 
-export default mongoose.models.Timeslot ||
-    mongoose.model("Timeslot", TimeslotSchema)
-
 export type Timeslot = mongoose.InferSchemaType<typeof TimeslotSchema>
+
+const TimeslotModel: Model<Timeslot> =
+    models.Timeslot || model<Timeslot>("Timeslot", TimeslotSchema)
+
+export default TimeslotModel
