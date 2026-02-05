@@ -69,7 +69,7 @@ export default function Home() {
         {/* Loading indicator */}
         {loading && (
           <p className="text-sm text-gray-500">
-            Loading timezones and timeslots...
+            Loading timezones and timeslots ...
           </p>
         )}
 
