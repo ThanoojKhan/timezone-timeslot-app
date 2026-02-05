@@ -1,138 +1,154 @@
-# Timezone & Timeslot Management Application
+# Frontend -- Timezone & Timeslot Management
 
 ## Overview
 
-This application demonstrates a robust approach to handling timezones
-and timeslots in a global context. All times are stored in UTC and
-converted on the client based on the user's selected timezone. The
-implementation focuses on correctness, clarity and real-world timezone
-edge cases such as daylight saving time.
+This frontend is a **Next.js (App Router) TypeScript application**
+responsible for:
 
-## Key Design Principles
+-   Fetching UTC-based timeslot data from the backend API
+-   Converting timestamps into user-selected timezones
+-   Rendering timezone-safe formatted UI
 
--   Store all timestamps in UTC
--   Use IANA timezone identifiers for conversion
--   Never rely on browser local timezone implicitly
--   Separate conversion logic from presentation logic
+The design ensures **no timezone logic is trusted to the browser
+implicitly** and guarantees **globally correct time display**.
 
-## Architecture Update
+------------------------------------------------------------------------
 
-### Separation of Backend and Frontend
+# Tech Stack
 
-The system has been refactored into independent backend and frontend
-applications.
+-   **Next.js (App Router)**
+-   **React + TypeScript**
+-   **date-fns-tz** for timezone-safe conversion
+-   **Axios** for API communication
+-   **Tailwind CSS / PostCSS** for styling
 
-#### Backend
+------------------------------------------------------------------------
 
--   Implemented using Node.js, Express and TypeScript
--   Provides REST APIs for timeslots and timezone metadata
--   Handles database access, validation and error management
--   Uses MongoDB with Mongoose and a global connection cache
--   Follows layered architecture: Routes, Controllers, Services, Models
-    and Utilities
+# Project Structure
 
-#### Frontend
+    src
+     ├─ app                 → Next.js App Router pages & layouts
+     ├─ components          → Reusable UI components
+     ├─ lib                 → Shared helpers & utilities
+     ├─ services
+     │   ├─ axiosConnection → Axios base configuration
+     │   ├─ backendAPI      → API request wrappers
+     │   └─ errorHandlers   → Centralized client error handling
+     ├─ types               → Shared TypeScript domain types
 
--   Implemented as a separate client application
--   Responsible for fetching UTC data from APIs, performing timezone
-    conversion and rendering formatted output
--   No business logic or database assumptions exist in the UI layer
+### Architectural Principle
 
-This separation improves scalability, maintainability, deployment
-flexibility and testability.
+**UI → Service → Backend API**
 
-## Data Model
+-   UI components never call APIs directly
+-   Services isolate networking logic
+-   Types ensure strict data contracts
 
-### Timeslot
+This improves:
 
--   Stored as a UTC ISO string
--   Example: 2025-01-23T00:00:00Z
--   Represents an absolute moment in time
+-   maintainability
+-   testability
+-   scalability
 
-### Timezone
+------------------------------------------------------------------------
 
-Each timezone record includes: - id -- short identifier like IST or
-AKT - name -- human-readable name - offset -- base UTC offset used for
-display only - iana -- IANA timezone identifier such as Asia/Kolkata
+# Timezone Handling Strategy
 
-## Backend Behavior
+## Core Rule
 
-### Storage
+**All timestamps originate in UTC from the backend.**
 
--   The backend stores all timeslots strictly in UTC
--   No local timezone assumptions are made during insertion
+The frontend is responsible for:
 
-### APIs
+1.  Receiving UTC ISO timestamps
+2.  Converting using selected **IANA timezone**
+3.  Formatting safely for display
 
--   /api/timeslots returns an ordered list of UTC timestamps
--   /api/timezones returns timezone metadata including IANA identifiers
--   /api/seed seeds hard-coded data into the database for testing
+------------------------------------------------------------------------
 
-### Database Connection Management
+## Why IANA Timezones
 
--   MongoDB is the primary data store
--   Mongoose is used as the ODM
--   A global cached connection prevents duplicate connections
--   Startup waits for successful DB connection before serving requests
--   Graceful shutdown safely closes DB connections
+IANA identifiers:
 
-## Frontend Architecture
+-   Handle daylight saving automatically
+-   Support historical timezone changes
+-   Avoid manual offset errors
 
-### Conversion Flow
+------------------------------------------------------------------------
 
-1.  UTC times are fetched from the API
-2.  User selects a timezone
-3.  UTC times are converted using the selected IANA timezone
-4.  Converted times are displayed to the user
+## Conversion Flow
 
-### Libraries Used
+1.  Fetch UTC timestamps from backend
+2.  User selects timezone
+3.  Convert using `date-fns-tz`
+4.  Render formatted local time
 
--   date-fns-tz for timezone-aware conversion and formatting
--   React hooks for state management
+No browser-local assumptions are used.
 
-## Time Conversion Strategy
+------------------------------------------------------------------------
 
-### Why IANA Timezones
+# Display Guarantees
 
-IANA timezone identifiers automatically handle daylight saving time
-changes, historical offset changes and regional timezone rules.
+-   UTC is always displayed using **explicit UTC formatting**
+-   Local time uses **selected IANA timezone only**
+-   Offset values are **informational only**, never used for math
 
-### Conversion Logic
+This prevents:
 
--   toZonedTime converts UTC to a local Date object
--   formatInTimeZone ensures explicit timezone-safe formatting
+-   DST bugs
+-   incorrect regional offsets
+-   inconsistent browser behavior
 
-UTC is always formatted explicitly using the UTC timezone to avoid
-browser-local leakage.
+------------------------------------------------------------------------
 
-## Display Rules
+# Running the Frontend
 
--   Original UTC is always formatted in UTC
--   Selected timezone is converted explicitly using the chosen IANA
-    identifier
--   Offset is displayed only as metadata and never used for conversion
+## Install
 
-## Example
+    npm install
 
-For a stored UTC value: 2025-01-23T00:00:00Z
+## Development
 
-  Timezone              Displayed Time
-  --------------------- ---------------------------
-  UTC                   23 Jan 2025, 12:00 AM UTC
-  India Standard Time   23 Jan 2025, 05:30 AM
-  Alaska Time           22 Jan 2025, 03:00 PM
+    npm run dev
 
-## Common Pitfalls Avoided
+## Production build
 
--   Formatting UTC using browser local timezone
--   Manual offset-based conversion
--   Ignoring daylight saving time
--   Storing local time in the database
+    npm run build
+    npm start
 
-## Final Notes
+------------------------------------------------------------------------
 
-This project prioritizes correctness, clarity and architectural
-discipline over shortcuts. The separation of backend and frontend
-combined with strict UTC storage and IANA-based conversion demonstrates
-a production-safe timezone handling strategy suitable for real-world
-systems.
+# Production Safety Practices
+
+-   Strict TypeScript typing across UI and services
+-   Centralized API communication layer
+-   Explicit timezone conversion using IANA
+-   Separation of UI and networking logic
+-   Environment-based backend URL configuration
+
+These match **real-world production frontend standards**.
+
+------------------------------------------------------------------------
+
+# Relationship with Backend
+
+-   Backend stores **UTC only**
+-   Frontend performs **all timezone conversions**
+-   Clear contract via **typed API responses**
+
+This separation guarantees:
+
+-   correctness across regions
+-   independent deployment
+-   scalable architecture
+
+------------------------------------------------------------------------
+
+# Author Note
+
+This frontend is intentionally designed to demonstrate:
+
+-   production-grade timezone handling
+-   clean Next.js architecture
+-   strict separation of concerns
+-   interview-ready engineering quality
